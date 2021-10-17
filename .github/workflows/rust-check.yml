@@ -1,0 +1,77 @@
+name: Check if the code can build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  cargo-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        projects:
+          - unsafe_alternatives
+          - unsafe_alternatives_builder
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: beta
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+            unsafe_alternatives_builder/target/
+          key: v0-${{ runner.os }}-cargo-check-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            v0-${{ runner.os }}-cargo-check-${{ hashFiles('**/Cargo.lock') }}
+            v0-${{ runner.os }}-cargo-check-
+            v0-${{ runner.os }}-cargo-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: -p ${{ matrix.projects }}
+
+  # REASON: There are no unit test yet.
+  #
+  # cargo-test:
+  #   needs: cargo-check
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - windows-latest
+  #         - ubuntu-latest
+  #         - macos-11
+  #       projects:
+  #         - unsafe_alternatives
+  #         - unsafe_alternatives_builder
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions-rs/toolchain@v1
+  #       with:
+  #         toolchain: beta
+  #     - uses: actions/cache@v2
+  #       with:
+  #         path: |
+  #           ~/.cargo/bin/
+  #           ~/.cargo/registry/index/
+  #           ~/.cargo/registry/cache/
+  #           ~/.cargo/git/db/
+  #           target/
+  #           unsafe_alternatives_builder/target/
+  #         key: v0-${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+  #         restore-keys: |
+  #           v0-${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+  #           v0-${{ runner.os }}-cargo-test-
+  #           v0-${{ runner.os }}-cargo-
+  #     - uses: actions-rs/cargo@v1
+  #       with:
+  #         command: test
+  #         args: -p ${{ matrix.projects }}
