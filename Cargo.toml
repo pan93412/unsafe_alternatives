@@ -2,7 +2,7 @@
 name = "unsafe_alternatives"
 description = "The alternative unsafe syntax for Rust."
 version = "1.0.0"
-edition = "2021"
+edition = "2018"
 license = "MIT"
 
 [dependencies]
